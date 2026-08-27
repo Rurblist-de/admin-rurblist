@@ -115,6 +115,20 @@ export type AdminProperty = {
 
 export type PaymentStatus = "pending" | "success" | "failed" | "refunded";
 
+export type EscrowLedgerStatus =
+  | "released"
+  | "held_in_escrow"
+  | "initiated"
+  | "disputed";
+
+export type EscrowTimelineStep = {
+  id: string;
+  title: string;
+  actor: string;
+  timestamp: string;
+  done: boolean;
+};
+
 export type AdminPayment = {
   id: string;
   reference: string;
@@ -122,9 +136,47 @@ export type AdminPayment = {
   amount: number;
   currency: "NGN";
   status: PaymentStatus;
+  escrowStatus: EscrowLedgerStatus;
   paymentFor: "tour" | "property" | "subscription" | "refund";
   createdAt: string;
   verificationId?: string;
+  buyerName?: string;
+  agentName?: string;
+  provider?: string;
+  initiatedAt?: string;
+  fundedAt?: string;
+  timeline?: EscrowTimelineStep[];
+};
+
+export type EscrowSummary = {
+  totalVolume: number;
+  inEscrow: number;
+  released: number;
+  disputed: number;
+};
+
+export type DisputeStatus = "new" | "open" | "resolved";
+
+export type AdminDispute = {
+  id: string;
+  status: DisputeStatus;
+  description: string;
+  amount: number;
+  date: string;
+  propertyTitle: string;
+  buyerName: string;
+  agentName: string;
+  verificationId?: string;
+};
+
+export type PayoutStatus = "pending" | "paid" | "failed";
+
+export type AdminPayout = {
+  id: string;
+  agentName: string;
+  amount: number;
+  status: PayoutStatus;
+  date: string;
 };
 
 export type VerificationStatus =

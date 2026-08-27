@@ -10,8 +10,10 @@ export default [
     route("users/:userId", "routes/_authenticated/users.$userId.tsx"),
     route("properties", "routes/_authenticated/properties.tsx"),
     route("properties/:propertyId", "routes/_authenticated/properties.$propertyId.tsx"),
-    route("escrow", "routes/_authenticated/escrow.tsx"),
-    route("escrow/:verificationId", "routes/_authenticated/escrow.$verificationId.tsx"),
+    route("escrow", "routes/_authenticated/escrow.tsx", [
+      index("routes/_authenticated/escrow-index.tsx"),
+      route(":verificationId", "routes/_authenticated/escrow.$verificationId.tsx"),
+    ]),
     route("content", "routes/_authenticated/content.tsx"),
     route("audit-logs", "routes/_authenticated/audit-logs.tsx"),
     route("support", "routes/_authenticated/support.tsx"),

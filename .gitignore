@@ -7,4 +7,5 @@
 /build/
 
 .agents/
+.vercel/
 
