@@ -8,6 +8,7 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { AppProviders } from "~/components/providers/app-providers";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -33,7 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <AppProviders>{children}</AppProviders>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -46,7 +47,7 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
+  let message = "Something went wrong";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
@@ -62,14 +63,14 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+    <main className="p-6">
+      <h1 className="text-lg font-semibold">{message}</h1>
+      <p className="mt-2 text-sm text-muted">{details}</p>
+      {stack ? (
+        <pre className="mt-4 overflow-x-auto text-xs">
           <code>{stack}</code>
         </pre>
-      )}
+      ) : null}
     </main>
   );
 }
