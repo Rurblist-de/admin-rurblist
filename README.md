@@ -44,21 +44,7 @@ bun run build
 
 ## CI/CD (GitHub Actions + Vercel)
 
-Pull requests and pushes to `main` run typecheck and a production build. After those checks pass, PRs get a Vercel preview and merges to `main` deploy to production.
-
-### GitHub secrets
-
-Create a Vercel project for this repo, then add these repository secrets:
-
-| Secret | Where to find it |
-| --- | --- |
-| `VERCEL_TOKEN` | [Vercel account tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID` | `.vercel/project.json` after `vercel link`, or Team Settings → Team ID |
-| `VERCEL_PROJECT_ID` | `.vercel/project.json` after `vercel link`, or Project Settings → General |
-
-Set `VITE_API_URL` on the Vercel project (Preview and Production). Optionally set the same value as a GitHub Actions variable so CI builds match.
-
-If you also connect the Vercel GitHub integration, disable Vercel’s automatic Git builds (Project Settings → Git → Ignored Build Step: `exit 0`) so only this workflow deploys.
+GitHub Actions typechecks and builds on `staging`, `main`, and pull requests. Vercel deploys when you connect this GitHub repo in the Vercel dashboard (Import Project). Set `VITE_API_URL` on the Vercel project for Preview and Production.
 
 ## Deployment
 
