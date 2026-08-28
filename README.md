@@ -42,6 +42,10 @@ Create a production build:
 bun run build
 ```
 
+## CI/CD (GitHub Actions + Vercel)
+
+GitHub Actions typechecks and builds on `staging`, `main`, and pull requests. Vercel deploys when you connect this GitHub repo in the Vercel dashboard (Import Project). Set `VITE_API_URL` on the Vercel project for Preview and Production.
+
 ## Deployment
 
 ### Docker Deployment
