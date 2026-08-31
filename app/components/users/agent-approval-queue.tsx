@@ -1,12 +1,14 @@
 import { Link } from "react-router";
-import { FileSearch } from "lucide-react";
+import { ChevronRight, FileSearch } from "lucide-react";
 
 export function AgentApprovalQueue({
   count,
   to = "/users?queue=approvals",
+  trailing = "count",
 }: {
   count: number;
   to?: string;
+  trailing?: "count" | "chevron";
 }) {
   return (
     <Link
@@ -16,9 +18,15 @@ export function AgentApprovalQueue({
     >
       <FileSearch className="size-5 shrink-0" strokeWidth={1.75} />
       Agent Approval Queue
-      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#E55B13] text-xs font-semibold text-white">
-        {count}
-      </span>
+      {trailing === "chevron" ? (
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#E55B13] text-white">
+          <ChevronRight className="size-3.5" strokeWidth={2.5} />
+        </span>
+      ) : (
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#E55B13] text-xs font-semibold text-white">
+          {count}
+        </span>
+      )}
     </Link>
   );
 }

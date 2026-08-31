@@ -101,6 +101,36 @@ export type AdminUser = {
   }>;
 };
 
+export type PropertyBoardStatus =
+  | "pending_review"
+  | "verified"
+  | "published"
+  | "sold_delisted";
+
+export type PropertyPricePeriod = "sale" | "month";
+
+export type PropertyTrustScore = "passed" | "failed" | "pending";
+
+export type PropertyDocumentStatus = "pending" | "verified" | "rejected";
+
+export type PropertyChecklistItem = {
+  id: string;
+  label: string;
+  done: boolean;
+};
+
+export type PropertyDocument = {
+  id: string;
+  name: string;
+  uploadedAt: string;
+  status: PropertyDocumentStatus;
+};
+
+export type PropertyAgent = {
+  id?: string;
+  name: string;
+};
+
 export type AdminProperty = {
   id: string;
   title: string;
@@ -108,9 +138,19 @@ export type AdminProperty = {
   city: string;
   state: string;
   price: number;
-  verificationStatus: "unverified" | "pending" | "verified";
-  isAvailable: boolean;
+  pricePeriod: PropertyPricePeriod;
+  boardStatus: PropertyBoardStatus;
+  featured?: boolean;
+  flagged?: boolean;
   ownerName: string;
+  phone?: string;
+  description?: string;
+  images?: string[];
+  listedAt?: string;
+  trustScore?: PropertyTrustScore;
+  checklist?: PropertyChecklistItem[];
+  documents?: PropertyDocument[];
+  agent?: PropertyAgent;
 };
 
 export type PaymentStatus = "pending" | "success" | "failed" | "refunded";

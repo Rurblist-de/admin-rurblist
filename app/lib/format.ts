@@ -6,6 +6,14 @@ export function formatNaira(amount: number): string {
   }).format(amount);
 }
 
+export function formatPropertyPrice(
+  amount: number,
+  period: "sale" | "month" = "sale",
+): string {
+  const base = `N${amount.toLocaleString("en-NG")}`;
+  return period === "month" ? `${base}/mo` : base;
+}
+
 export function formatCompactNaira(amount: number): string {
   if (amount >= 1_000_000) {
     const millions = amount / 1_000_000;
