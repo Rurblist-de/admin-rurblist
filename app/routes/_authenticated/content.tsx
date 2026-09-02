@@ -4,6 +4,7 @@ import { DataTable } from "~/components/ui/data-table";
 import { StatusBadge } from "~/components/ui/status-badge";
 import { formatDate } from "~/lib/format";
 import { requirePermission } from "~/lib/permissions";
+import { Link } from "react-router";
 
 const posts = [
   {
@@ -33,16 +34,12 @@ export default function Content({ loaderData }: Route.ComponentProps) {
         description="Public content stays in Sanity. This list is a stub until Studio is embedded."
       />
       <DataTable
-        headers={["Title", "Status", "Updated"]}
+        headers={["Link To Sanity"]}
         rows={posts.map((post) => [
-          post.title,
-          <StatusBadge
-            key={post.id}
-            tone={post.status === "published" ? "success" : "neutral"}
-          >
-            {post.status}
-          </StatusBadge>,
-          formatDate(post.updatedAt),
+          <Link key={post.id} to={`/content/${post.id}`}>
+            {post.title}
+          </Link>,
+          // <span key={post.id}>{formatDate(post.updatedAt)}</span>,
         ])}
       />
     </div>
