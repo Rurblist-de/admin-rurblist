@@ -1,4 +1,4 @@
-import { formatPropertyPrice } from "~/lib/format";
+import { formatDate, formatPropertyPrice } from "~/lib/format";
 import type {
   AdminProperty,
   PropertyBoardStatus,
@@ -49,6 +49,14 @@ export function PropertyInfoCard({ property }: { property: AdminProperty }) {
     { label: "Type", value: property.type },
     { label: "State", value: property.state },
     { label: "Listed", value: formatListedDate(property.listedAt) },
+    ...(property.totalUnits && property.totalUnits > 1
+      ? [
+          {
+            label: "Units",
+            value: `${property.availableUnits ?? property.totalUnits} of ${property.totalUnits} remaining`,
+          },
+        ]
+      : []),
   ];
   const documents = property.documents ?? [];
 
@@ -88,12 +96,25 @@ export function PropertyInfoCard({ property }: { property: AdminProperty }) {
                 className="flex items-center justify-between gap-3 rounded-[10px] border border-[#E5E7EB] px-4 py-3"
               >
                 <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-[#111827]">
-                    {doc.name}
-                  </span>
-                  <span className="mt-0.5 block text-xs text-[#6B7280]">
-                    Uploaded {doc.uploadedAt}
-                  </span>
+                  {doc.url ? (
+                    <a
+                      href={doc.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block text-sm font-semibold text-[#111827] hover:text-[#E55B13]"
+                    >
+                      {doc.name}
+                    </a>
+                  ) : (
+                    <span className="block text-sm font-semibold text-[#111827]">
+                      {doc.name}
+                    </span>
+                  )}
+                  {doc.uploadedAt ? (
+                    <span className="mt-0.5 block text-xs text-[#6B7280]">
+                      Uploaded {formatDate(doc.uploadedAt)}
+                    </span>
+                  ) : null}
                 </span>
                 <DocumentStatusBadge status={doc.status} />
               </li>

@@ -1,8 +1,8 @@
+import { Link } from "react-router";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
 import { Bell } from "lucide-react";
-import { useMe } from "~/queries/auth/use-auth";
-import { clearAuthCookie } from "~/lib/auth/session";
+import { useMe } from "~/features/auth/hooks/use-me";
+import { useLogout } from "~/features/auth/hooks/use-logout";
 import { initials } from "~/lib/format";
 import {
   SidebarTrigger,
@@ -10,16 +10,11 @@ import {
 } from "~/components/layout/sidebar-context";
 
 export function Header() {
-  const { me } = useMe();
-  const navigate = useNavigate();
+  const { data: me } = useMe();
+  const logout = useLogout();
   const { open } = useSidebar();
   const [menuOpen, setMenuOpen] = useState(false);
   const name = me?.user.fullName ?? "Admin";
-
-  function logout() {
-    clearAuthCookie();
-    void navigate("/login");
-  }
 
   return (
     <header className="sticky top-0 z-50 flex h-18 shrink-0 items-center border-b border-stroke bg-white">
@@ -87,10 +82,11 @@ export function Header() {
               <p className="truncate px-4 py-2.5 text-sm text-ink">{name}</p>
               <button
                 type="button"
-                onClick={logout}
-                className="w-full px-4 py-2.5 text-left text-sm text-red-500 hover:bg-canvas"
+                onClick={() => logout.mutate()}
+                disabled={logout.isPending}
+                className="w-full px-4 py-2.5 text-left text-sm text-red-500 hover:bg-canvas disabled:opacity-70"
               >
-                Log out
+                {logout.isPending ? "Signing out..." : "Log out"}
               </button>
             </div>
           ) : null}

@@ -6,7 +6,7 @@ import { SidebarProvider } from "~/components/layout/sidebar-context";
 import { PermissionProvider } from "~/lib/permissions";
 import { getTokenFromRequest } from "~/lib/auth/session";
 
-export async function loader({ request }: Route.LoaderArgs) {
+export function loader({ request }: Route.LoaderArgs) {
   if (!getTokenFromRequest(request)) {
     throw redirect("/login");
   }

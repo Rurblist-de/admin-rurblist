@@ -1,28 +1,42 @@
 import { createContext, useMemo, type ReactNode } from "react";
 import { buildAbility, type AppAbility } from "./permissions.ability";
-import { useMe } from "~/queries/auth/use-auth";
-import { STUB_ADMIN } from "~/lib/auth/stub-me";
-import type { Role } from "~/services/api/types";
+import { useMe } from "~/features/auth/hooks/use-me";
+import type { AuthMe, Role } from "~/services/api/types";
+
+const LOADING_ADMIN: AuthMe = {
+  user: {
+    id: "session",
+    email: "",
+    fullName: "",
+    type: "admin",
+  },
+  roles: [{ id: "Admin", name: "Admin" }],
+  permissions: [{ action: "manage", resource: "all" }],
+  rules: [{ action: "manage", subject: "all" }],
+};
 
 type PermissionContextValue = {
   ability: AppAbility;
   roles: Role[];
   isReady: boolean;
+  me: AuthMe | null;
 };
 
 const PermissionContext = createContext<PermissionContextValue | null>(null);
 
 function PermissionProvider({ children }: { children: ReactNode }) {
-  const { me, isLoading } = useMe();
+  const meQuery = useMe();
+  const me = meQuery.data ?? null;
 
-  const value = useMemo<PermissionContextValue>(
-    () => ({
-      ability: buildAbility(me ?? (isLoading ? STUB_ADMIN : null)),
-      roles: me?.roles ?? (isLoading ? STUB_ADMIN.roles : []),
-      isReady: !isLoading,
-    }),
-    [me, isLoading],
-  );
+  const value = useMemo<PermissionContextValue>(() => {
+    const resolved = me ?? LOADING_ADMIN;
+    return {
+      ability: buildAbility(resolved),
+      roles: resolved.roles,
+      isReady: Boolean(me) || meQuery.isError,
+      me,
+    };
+  }, [me, meQuery.isError]);
 
   return (
     <PermissionContext.Provider value={value}>
