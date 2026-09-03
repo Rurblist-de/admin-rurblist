@@ -64,11 +64,12 @@ export type AdminUser = {
   fullName: string;
   email: string;
   phone?: string;
-  role: "Home_Seeker" | "Agent" | "Landlord" | "Developer" | "Admin";
+  role: "Home_Seeker" | "Agent" | "Landlord" | "Developer" | "Admin" | "Super_Admin";
   state: string;
   status: UserStatus;
   joinedAt: string;
-  agentStatus?: AgentStatus;
+  profileImage?: string | null;
+  agentStatus?: AgentStatus | null;
   cacNumber?: string;
   documents?: Array<{
     id: string;
@@ -121,7 +122,9 @@ export type PropertyChecklistItem = {
 
 export type PropertyDocument = {
   id: string;
+  type?: "certificate_of_occupancy" | "survey_plan" | "deed_of_assignment";
   name: string;
+  url?: string;
   uploadedAt: string;
   status: PropertyDocumentStatus;
 };
@@ -129,6 +132,31 @@ export type PropertyDocument = {
 export type PropertyAgent = {
   id?: string;
   name: string;
+  kycStatus?: AgentStatus;
+};
+
+export type PropertyListingReview = "pending" | "approved" | "rejected";
+
+export type PropertyInspectionStatus =
+  | "not_started"
+  | "scheduled"
+  | "completed"
+  | "failed";
+
+export type PropertyInspectionStep = {
+  id: string;
+  title: string;
+  description: string;
+  status: "success" | "info" | "warning" | "failed";
+  date?: string;
+};
+
+export type PropertyInspection = {
+  status: PropertyInspectionStatus;
+  scheduledAt?: string;
+  completedAt?: string;
+  note?: string;
+  timeline: PropertyInspectionStep[];
 };
 
 export type AdminProperty = {
@@ -142,6 +170,10 @@ export type AdminProperty = {
   boardStatus: PropertyBoardStatus;
   featured?: boolean;
   flagged?: boolean;
+  listingReview?: PropertyListingReview;
+  isSold?: boolean;
+  totalUnits?: number;
+  availableUnits?: number;
   ownerName: string;
   phone?: string;
   description?: string;
@@ -150,6 +182,7 @@ export type AdminProperty = {
   trustScore?: PropertyTrustScore;
   checklist?: PropertyChecklistItem[];
   documents?: PropertyDocument[];
+  inspection?: PropertyInspection;
   agent?: PropertyAgent;
 };
 
@@ -169,6 +202,46 @@ export type EscrowTimelineStep = {
   done: boolean;
 };
 
+export type EscrowDocumentStatus =
+  | "pending"
+  | "submitted"
+  | "under_review"
+  | "verified"
+  | "rejected";
+
+export type EscrowDocument = {
+  id: string;
+  name: string;
+  url?: string;
+  status: EscrowDocumentStatus;
+  note?: string;
+  submittedAt?: string;
+  verifiedAt?: string;
+  rejectedAt?: string;
+};
+
+export type EscrowInspectionStatus =
+  | "not_started"
+  | "scheduled"
+  | "completed"
+  | "failed";
+
+export type EscrowInspectionStep = {
+  id: string;
+  title: string;
+  description: string;
+  status: "success" | "info" | "warning" | "failed";
+  date?: string;
+};
+
+export type EscrowInspection = {
+  status: EscrowInspectionStatus;
+  scheduledAt?: string;
+  completedAt?: string;
+  note?: string;
+  timeline: EscrowInspectionStep[];
+};
+
 export type AdminPayment = {
   id: string;
   reference: string;
@@ -179,6 +252,7 @@ export type AdminPayment = {
   escrowStatus: EscrowLedgerStatus;
   paymentFor: "tour" | "property" | "subscription" | "refund";
   createdAt: string;
+  paymentId?: string;
   verificationId?: string;
   buyerName?: string;
   agentName?: string;
@@ -186,6 +260,22 @@ export type AdminPayment = {
   initiatedAt?: string;
   fundedAt?: string;
   timeline?: EscrowTimelineStep[];
+  verificationStatus?: VerificationStatus;
+  fundsReleased?: boolean;
+  fundsReleasedAt?: string;
+  rejectionReason?: string;
+  currentStage?: {
+    title: string;
+    description: string;
+    estimatedCompletion?: string | null;
+  };
+  documents?: EscrowDocument[];
+  inspection?: EscrowInspection;
+  certificate?: {
+    id?: string;
+    url?: string;
+    issuedAt?: string;
+  };
 };
 
 export type EscrowSummary = {
@@ -217,6 +307,7 @@ export type AdminPayout = {
   amount: number;
   status: PayoutStatus;
   date: string;
+  verificationId?: string;
 };
 
 export type VerificationStatus =

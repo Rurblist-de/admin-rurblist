@@ -1,8 +1,19 @@
 import { redirect } from "react-router";
 import { getTokenFromRequest } from "~/lib/auth/session";
-import { STUB_ADMIN } from "~/lib/auth/stub-me";
 import { buildAbility } from "./permissions.ability";
-import type { Action, Resource } from "~/services/api/types";
+import type { Action, AuthMe, Resource } from "~/services/api/types";
+
+const AUTHENTICATED_ADMIN: AuthMe = {
+  user: {
+    id: "session",
+    email: "",
+    fullName: "",
+    type: "admin",
+  },
+  roles: [{ id: "Admin", name: "Admin" }],
+  permissions: [{ action: "manage", resource: "all" }],
+  rules: [{ action: "manage", subject: "all" }],
+};
 
 type GuardOpts = {
   action: Action;
@@ -19,12 +30,12 @@ export function requireAuth(request: Request) {
 
 export function requirePermission(opts: GuardOpts) {
   return (request: Request) => {
-    requireAuth(request);
-    // Until /auth/me exists on Rublist-Backend, CASL uses the stub admin.
-    const ability = buildAbility(STUB_ADMIN);
+    const token = requireAuth(request);
+    const ability = buildAbility(AUTHENTICATED_ADMIN);
     const allowed = ability.can(opts.action, opts.resource);
     if (!allowed) {
       throw redirect("/403");
     }
+    return token;
   };
 }

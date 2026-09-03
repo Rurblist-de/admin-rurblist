@@ -11,6 +11,9 @@ export function PropertyFilters({
   view,
   typeOptions,
   stateOptions,
+  onQChange,
+  onQFocus,
+  onQBlur,
 }: {
   q: string;
   type: string;
@@ -18,9 +21,12 @@ export function PropertyFilters({
   view: PropertiesView;
   typeOptions: string[];
   stateOptions: string[];
+  onQChange: (value: string) => void;
+  onQFocus?: () => void;
+  onQBlur?: () => void;
 }) {
   return (
-    <Form method="get" className="mb-5">
+    <Form method="get" className="mb-5" key={`${type}|${state}|${view}`}>
       <input type="hidden" name="view" value={view} />
       <div className="flex flex-col gap-3 rounded-[12px] border border-[#E5E7EB] bg-white p-3 lg:flex-row lg:items-center lg:gap-3">
         <label className="relative min-w-0 flex-1">
@@ -32,8 +38,12 @@ export function PropertyFilters({
           <input
             type="search"
             name="q"
-            defaultValue={q}
+            value={q}
+            onFocus={onQFocus}
+            onBlur={onQBlur}
+            onChange={(event) => onQChange(event.currentTarget.value)}
             placeholder="Search by name, phone number..."
+            autoComplete="off"
             className="h-11 w-full rounded-full border border-[#E5E7EB] bg-white pl-12 pr-4 text-sm text-[#111827] outline-none placeholder:text-[#9CA3AF] focus:border-[#E55B13]"
           />
         </label>
@@ -41,7 +51,7 @@ export function PropertyFilters({
           <FilterSelect name="type" label="Types" value={type}>
             {typeOptions.map((option) => (
               <option key={option} value={option.toLowerCase()}>
-                {option}
+                {option.replaceAll("_", " ")}
               </option>
             ))}
           </FilterSelect>
@@ -91,7 +101,7 @@ function FilterSelect({
         name={name}
         defaultValue={value}
         onChange={(event) => event.currentTarget.form?.requestSubmit()}
-        className="h-11 min-w-[7.5rem] appearance-none rounded-[8px] border border-[#E5E7EB] bg-white py-2 pl-4 pr-10 text-sm text-[#111827] outline-none focus:border-[#E55B13]"
+        className="h-11 min-w-[11rem] appearance-none rounded-[8px] border border-[#E5E7EB] bg-white py-2 pl-4 pr-10 text-sm text-[#111827] outline-none focus:border-[#E55B13]"
       >
         <option value="">{label}</option>
         {children}
@@ -134,17 +144,20 @@ export function viewHref({
   type,
   state,
   view,
+  page = 1,
 }: {
   q: string;
   type: string;
   state: string;
   view: PropertiesView;
+  page?: number;
 }) {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
   if (type) params.set("type", type);
   if (state) params.set("state", state);
   if (view !== "board") params.set("view", view);
+  if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `/properties?${query}` : "/properties";
 }

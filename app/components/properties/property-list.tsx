@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Eye } from "lucide-react";
+import type { ReactNode } from "react";
 import { formatPropertyPrice } from "~/lib/format";
 import { StatusBadge } from "~/components/ui/status-badge";
 import { FlagBadge } from "~/components/properties/flag-badge";
@@ -12,7 +13,13 @@ const STATUS_LABEL: Record<PropertyBoardStatus, string> = {
   sold_delisted: "Sold/ Delisted",
 };
 
-export function PropertyList({ properties }: { properties: AdminProperty[] }) {
+export function PropertyList({
+  properties,
+  footer,
+}: {
+  properties: AdminProperty[];
+  footer?: ReactNode;
+}) {
   return (
     <div className="overflow-hidden rounded-[12px] border border-[#E5E7EB] bg-white">
       <div className="overflow-x-auto">
@@ -52,7 +59,9 @@ export function PropertyList({ properties }: { properties: AdminProperty[] }) {
                       {property.ownerName}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-[#6B7280]">{property.type}</td>
+                  <td className="px-5 py-3.5 text-[#6B7280]">
+                    {property.type.replaceAll("_", " ")}
+                  </td>
                   <td className="px-5 py-3.5 text-[#6B7280]">
                     {property.city}, {property.state}
                   </td>
@@ -92,6 +101,7 @@ export function PropertyList({ properties }: { properties: AdminProperty[] }) {
           </tbody>
         </table>
       </div>
+      {footer}
     </div>
   );
 }

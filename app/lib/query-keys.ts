@@ -3,7 +3,12 @@ export const queryKeys = {
     me: ["auth", "me"] as const,
   },
   overview: {
-    stats: ["overview", "stats"] as const,
+    listings: ["overview", "listings"] as const,
+    escrow: ["overview", "escrow"] as const,
+    verifications: ["overview", "verifications"] as const,
+    escrowTrend: ["overview", "escrow-trend"] as const,
+    listingsByState: ["overview", "listings-by-state"] as const,
+    attention: ["overview", "attention"] as const,
   },
   users: {
     list: (params?: Record<string, unknown>) =>
@@ -24,6 +29,11 @@ export const queryKeys = {
     list: (params?: Record<string, unknown>) =>
       ["payments", "list", params] as const,
     get: (id: string) => ["payments", id] as const,
+  },
+  escrow: {
+    list: (params?: Record<string, unknown>) =>
+      ["escrow", "list", params] as const,
+    get: (id: string) => ["escrow", id] as const,
   },
   verifications: {
     list: (params?: Record<string, unknown>) =>
