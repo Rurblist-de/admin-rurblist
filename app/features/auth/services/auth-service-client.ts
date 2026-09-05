@@ -16,8 +16,8 @@ export async function loginAdmin(
     throw new Error(res.message);
   }
 
-  if (!res.data?.accessToken) {
-    throw new Error("Access token missing from response");
+  if (!res.data?.authenticated) {
+    throw new Error("Authentication failed");
   }
 
   return res;

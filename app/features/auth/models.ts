@@ -5,7 +5,7 @@ export type LoginPayload = {
   password: string;
 };
 
+/** Client-safe admin login payload — JWTs stay in httpOnly API cookies only. */
 export type AdminLoginData = AuthMe & {
-  accessToken: string;
-  refreshToken?: string;
+  authenticated?: boolean;
 };
