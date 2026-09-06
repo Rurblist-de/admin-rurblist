@@ -1,13 +1,11 @@
 import { redirect } from "react-router";
-import {
-  buildClearAuthCookie,
-  buildClearRefreshCookie,
-} from "~/lib/auth/session";
+import { buildClearSessionCookies } from "~/lib/auth/session";
 
 export function action() {
   const headers = new Headers();
-  headers.append("Set-Cookie", buildClearAuthCookie());
-  headers.append("Set-Cookie", buildClearRefreshCookie());
+  for (const cookie of buildClearSessionCookies()) {
+    headers.append("Set-Cookie", cookie);
+  }
   throw redirect("/login", { headers });
 }
 

@@ -54,6 +54,33 @@ function buildClearSessionCookie() {
   return `${ADMIN_SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax${cookieSecureFlag()}`;
 }
 
+function buildClearLegacyAuthCookie() {
+  return `rublist_admin_token=; Path=/; Max-Age=0; SameSite=Lax${cookieSecureFlag()}`;
+}
+
+function buildClearLegacyRefreshCookie() {
+  return `rublist_admin_refresh=; Path=/; Max-Age=0; SameSite=Lax${cookieSecureFlag()}`;
+}
+
+/** SSR Set-Cookie values that clear the session marker + legacy JWT mirrors. */
+export function buildClearSessionCookies(): string[] {
+  return [
+    buildClearSessionCookie(),
+    buildClearLegacyAuthCookie(),
+    buildClearLegacyRefreshCookie(),
+  ];
+}
+
+/** @deprecated Prefer buildClearSessionCookies() */
+export function buildClearAuthCookie() {
+  return buildClearSessionCookie();
+}
+
+/** @deprecated Prefer buildClearSessionCookies() */
+export function buildClearRefreshCookie() {
+  return buildClearLegacyRefreshCookie();
+}
+
 /** Mark the admin UI as signed in. API JWTs stay in httpOnly API cookies only. */
 export function setAuthSession() {
   if (typeof document === "undefined") return;
