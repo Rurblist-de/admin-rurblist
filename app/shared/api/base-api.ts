@@ -1,8 +1,5 @@
 import { API_URL } from "~/shared/config/api-links";
-import {
-  getTokenFromDocument,
-  logoutClient,
-} from "~/lib/auth/session";
+import { logoutClient } from "~/lib/auth/session";
 import {
   getRefreshing,
   onRefreshed,
@@ -81,16 +78,11 @@ export async function request<T = unknown>(
   const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT);
 
   try {
-    const token = getTokenFromDocument();
     const headers: HeadersInit = {};
     const isFormData = payload instanceof FormData;
 
     if (!isFormData && responseType === "json") {
       headers["Content-Type"] = "application/json";
-    }
-
-    if (protectedRoute && token) {
-      headers.Authorization = `Bearer ${token}`;
     }
 
     const url = new URL(`/api/v1${path}`, API_URL);
@@ -116,11 +108,10 @@ export async function request<T = unknown>(
         setRefreshing(true);
         try {
           const refreshRes = await refreshTokenRequest();
-          const newToken = refreshRes.data?.accessToken;
 
-          if (!newToken) throw new Error("Refresh failed");
+          if (!refreshRes.data?.authenticated) throw new Error("Refresh failed");
 
-          onRefreshed(newToken);
+          onRefreshed("ok");
           setRefreshing(false);
 
           return request<T>(method, path, {

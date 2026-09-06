@@ -9,12 +9,8 @@ export async function loginAdminRequest(
 ): Promise<ApiResponse<AdminLoginData>> {
   const res = await api.post<AdminLoginData>("/auth/admin-login", data);
 
-  if ((res.statusCode ?? 0) < 400) {
-    const accessToken = res.data?.accessToken;
-    const refreshToken = res.data?.refreshToken;
-    if (accessToken) {
-      setAuthSession(accessToken, refreshToken);
-    }
+  if ((res.statusCode ?? 0) < 400 && res.data?.authenticated) {
+    setAuthSession();
   }
 
   return res;

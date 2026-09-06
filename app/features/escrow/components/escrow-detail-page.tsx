@@ -402,13 +402,36 @@ function EscrowActionsCard({
   const requiredDocsOk =
     requiredDocs.length > 0 &&
     requiredDocs.every((doc) => doc.status === "verified");
+  const inspectionDone = Boolean(payment.inspection?.completedAt);
   const closed =
     payment.escrowStatus === "released" || payment.escrowStatus === "disputed";
   const pendingPayment = payment.escrowStatus === "initiated";
   const canRelease =
-    !closed && !pendingPayment && requiredDocsOk && !payment.fundsReleased;
+    !closed &&
+    !pendingPayment &&
+    requiredDocsOk &&
+    inspectionDone &&
+    !payment.fundsReleased;
   const canReject = !closed && !pendingPayment;
   const pending = reviewCase.isPending;
+
+  let releaseHint =
+    "Release marks funds released in escrow. Bank payout to the agent is not wired yet.";
+  if (closed) {
+    releaseHint =
+      payment.escrowStatus === "released"
+        ? "This escrow is closed after funds were released."
+        : "This escrow is closed as disputed.";
+  } else if (pendingPayment) {
+    releaseHint = "Wait for payment confirmation before reviewing this case.";
+  } else if (!requiredDocsOk) {
+    releaseHint =
+      "Approve required title documents (C of O and Survey Plan if present) before releasing funds.";
+  } else if (!inspectionDone) {
+    releaseHint = "Complete the property inspection before releasing funds.";
+  } else if (payment.fundsReleased) {
+    releaseHint = "Funds have already been released for this escrow.";
+  }
 
   return (
     <section className="rounded-xl border border-stroke bg-white">
@@ -474,28 +497,7 @@ function EscrowActionsCard({
             Reject / Mark Disputed
           </button>
 
-          {closed ? (
-            <p className="text-xs text-muted">
-              This escrow is closed
-              {payment.escrowStatus === "released"
-                ? " after funds were released."
-                : " as disputed."}
-            </p>
-          ) : pendingPayment ? (
-            <p className="text-xs text-muted">
-              Wait for payment confirmation before reviewing this case.
-            </p>
-          ) : !canRelease ? (
-            <p className="text-xs text-muted">
-              Approve required title documents (C of O and Survey Plan if
-              present) before releasing funds.
-            </p>
-          ) : (
-            <p className="text-xs text-muted">
-              Release marks funds released in escrow. Bank payout to the agent is
-              not wired yet.
-            </p>
-          )}
+          <p className="text-xs text-muted">{releaseHint}</p>
 
           {reviewCase.error ? (
             <p className="text-xs text-red-600">

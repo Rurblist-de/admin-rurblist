@@ -1,13 +1,9 @@
-import {
-  AUTHENTICATION_COOKIE,
-  AUTH_STORAGE_KEY,
-  REFRESH_TOKEN_COOKIE,
-} from "~/shared/config/api-links";
+import { ADMIN_SESSION_COOKIE } from "~/shared/config/api-links";
 
-const ACCESS_MAX_AGE_SECONDS = 60 * 60;
-const REFRESH_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+/** UI/SSR marker only — not a JWT. Real auth is httpOnly cookies on the API host. */
+const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
-export { AUTHENTICATION_COOKIE as AUTH_COOKIE, AUTH_STORAGE_KEY, REFRESH_TOKEN_COOKIE };
+export { ADMIN_SESSION_COOKIE as AUTH_COOKIE };
 
 function cookieSecureFlag() {
   return import.meta.env.PROD ? "; Secure" : "";
@@ -23,69 +19,91 @@ export function parseCookie(header: string | null, name: string): string | null 
   return null;
 }
 
-function isStubToken(token: string | null) {
-  return !token || token === "dev-admin";
+function isActiveSessionMarker(value: string | null) {
+  return value === "1";
 }
 
+export function hasSessionFromRequest(request: Request): boolean {
+  return isActiveSessionMarker(
+    parseCookie(request.headers.get("Cookie"), ADMIN_SESSION_COOKIE),
+  );
+}
+
+export function hasSessionFromDocument(): boolean {
+  if (typeof document === "undefined") return false;
+  return isActiveSessionMarker(
+    parseCookie(document.cookie, ADMIN_SESSION_COOKIE),
+  );
+}
+
+/** @deprecated Use hasSessionFromRequest — no JWT is stored on the admin origin. */
 export function getTokenFromRequest(request: Request): string | null {
-  const token = parseCookie(request.headers.get("Cookie"), AUTHENTICATION_COOKIE);
-  return isStubToken(token) ? null : token;
+  return hasSessionFromRequest(request) ? "1" : null;
 }
 
-export function getRefreshTokenFromRequest(request: Request): string | null {
-  return parseCookie(request.headers.get("Cookie"), REFRESH_TOKEN_COOKIE);
-}
-
+/** @deprecated Use hasSessionFromDocument — no JWT is stored on the admin origin. */
 export function getTokenFromDocument(): string | null {
-  if (typeof document === "undefined") return null;
-  const token = parseCookie(document.cookie, AUTHENTICATION_COOKIE);
-  return isStubToken(token) ? null : token;
+  return hasSessionFromDocument() ? "1" : null;
 }
 
-export function getRefreshTokenFromDocument(): string | null {
-  if (typeof document === "undefined") return null;
-  return parseCookie(document.cookie, REFRESH_TOKEN_COOKIE);
+function buildSetSessionCookie() {
+  return `${ADMIN_SESSION_COOKIE}=1; Path=/; SameSite=Lax; Max-Age=${SESSION_MAX_AGE_SECONDS}${cookieSecureFlag()}`;
 }
 
-export function buildSetAuthCookie(token: string) {
-  return `${AUTHENTICATION_COOKIE}=${encodeURIComponent(token)}; Path=/; SameSite=Lax; Max-Age=${ACCESS_MAX_AGE_SECONDS}${cookieSecureFlag()}`;
+function buildClearSessionCookie() {
+  return `${ADMIN_SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax${cookieSecureFlag()}`;
 }
 
-export function buildSetRefreshCookie(token: string) {
-  return `${REFRESH_TOKEN_COOKIE}=${encodeURIComponent(token)}; Path=/; SameSite=Lax; Max-Age=${REFRESH_MAX_AGE_SECONDS}${cookieSecureFlag()}`;
+function buildClearLegacyAuthCookie() {
+  return `rublist_admin_token=; Path=/; Max-Age=0; SameSite=Lax${cookieSecureFlag()}`;
 }
 
+function buildClearLegacyRefreshCookie() {
+  return `rublist_admin_refresh=; Path=/; Max-Age=0; SameSite=Lax${cookieSecureFlag()}`;
+}
+
+/** SSR Set-Cookie values that clear the session marker + legacy JWT mirrors. */
+export function buildClearSessionCookies(): string[] {
+  return [
+    buildClearSessionCookie(),
+    buildClearLegacyAuthCookie(),
+    buildClearLegacyRefreshCookie(),
+  ];
+}
+
+/** @deprecated Prefer buildClearSessionCookies() */
 export function buildClearAuthCookie() {
-  return `${AUTHENTICATION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax${cookieSecureFlag()}`;
+  return buildClearSessionCookie();
 }
 
+/** @deprecated Prefer buildClearSessionCookies() */
 export function buildClearRefreshCookie() {
-  return `${REFRESH_TOKEN_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax${cookieSecureFlag()}`;
+  return buildClearLegacyRefreshCookie();
 }
 
-export function setAuthSession(accessToken: string, refreshToken?: string) {
+/** Mark the admin UI as signed in. API JWTs stay in httpOnly API cookies only. */
+export function setAuthSession() {
   if (typeof document === "undefined") return;
-  document.cookie = buildSetAuthCookie(accessToken);
-  if (refreshToken) {
-    document.cookie = buildSetRefreshCookie(refreshToken);
-  }
+  document.cookie = buildSetSessionCookie();
   try {
-    localStorage.setItem(AUTH_STORAGE_KEY, accessToken);
+    localStorage.removeItem("rublist-admin-auth");
   } catch {
     // ignore
   }
 }
 
-export function setAuthCookie(token: string) {
-  setAuthSession(token);
+export function setAuthCookie() {
+  setAuthSession();
 }
 
 export function clearAuthCookie() {
   if (typeof document === "undefined") return;
-  document.cookie = buildClearAuthCookie();
-  document.cookie = buildClearRefreshCookie();
+  document.cookie = buildClearSessionCookie();
+  // Legacy JWT mirrors from older builds
+  document.cookie = `rublist_admin_token=; Path=/; Max-Age=0; SameSite=Lax${cookieSecureFlag()}`;
+  document.cookie = `rublist_admin_refresh=; Path=/; Max-Age=0; SameSite=Lax${cookieSecureFlag()}`;
   try {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem("rublist-admin-auth");
   } catch {
     // ignore
   }
