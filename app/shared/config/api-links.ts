@@ -1,5 +1,5 @@
 export const API_URL = (
-  import.meta.env.VITE_API_URL ?? "http://localhost:6003"
+  import.meta.env.VITEAPIURL ?? "http://localhost:6003"
 ).replace(/\/$/, "");
 
 /** Non-JWT marker for Remix loaders / query `enabled` — real tokens are API httpOnly cookies. */
