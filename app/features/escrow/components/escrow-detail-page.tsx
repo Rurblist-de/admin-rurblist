@@ -6,6 +6,7 @@ import { formatDate, formatDateTime, formatNaira } from "~/lib/format";
 import { Can } from "~/lib/permissions";
 import type {
   AdminPayment,
+  EscrowBankDetails,
   EscrowDocumentStatus,
   EscrowInspectionStep,
   EscrowTimelineStep,
@@ -110,10 +111,53 @@ export function EscrowDetailPage({ verificationId }: { verificationId: string })
             </dl>
           </section>
 
+          <BankDetailsPanel
+            title="Agent payout account"
+            emptyLabel="Agent has not saved payout bank details yet."
+            details={payment.agentPayoutDetails}
+          />
+          <BankDetailsPanel
+            title="Buyer refund account"
+            emptyLabel="Buyer has not saved refund bank details yet."
+            details={payment.buyerBankDetails}
+          />
+
           <EscrowActionsCard payment={payment} verificationId={verificationId} />
         </div>
       </div>
     </div>
+  );
+}
+
+function BankDetailsPanel({
+  title,
+  emptyLabel,
+  details,
+}: {
+  title: string;
+  emptyLabel: string;
+  details?: EscrowBankDetails | null;
+}) {
+  return (
+    <section className="rounded-xl border border-stroke bg-white p-5">
+      <h2 className="text-sm font-semibold text-ink">{title}</h2>
+      {details ? (
+        <dl className="mt-4 space-y-3 text-sm">
+          <DetailRow label="Bank" value={details.bankName || "—"} />
+          <DetailRow label="Account name" value={details.accountName || "—"} />
+          <DetailRow
+            label="Account number"
+            value={
+              details.accountNumber ||
+              details.accountNumberMasked ||
+              "—"
+            }
+          />
+        </dl>
+      ) : (
+        <p className="mt-3 text-sm text-amber-700">{emptyLabel}</p>
+      )}
+    </section>
   );
 }
 
@@ -406,17 +450,20 @@ function EscrowActionsCard({
   const closed =
     payment.escrowStatus === "released" || payment.escrowStatus === "disputed";
   const pendingPayment = payment.escrowStatus === "initiated";
+  const hasAgentPayout = Boolean(payment.agentPayoutDetails);
+  const hasBuyerRefund = Boolean(payment.buyerBankDetails);
   const canRelease =
     !closed &&
     !pendingPayment &&
     requiredDocsOk &&
     inspectionDone &&
+    hasAgentPayout &&
     !payment.fundsReleased;
-  const canReject = !closed && !pendingPayment;
+  const canReject = !closed && !pendingPayment && hasBuyerRefund;
   const pending = reviewCase.isPending;
 
   let releaseHint =
-    "Release marks funds released in escrow. Bank payout to the agent is not wired yet.";
+    "Release marks funds released in escrow. Pay the agent using the payout account shown above.";
   if (closed) {
     releaseHint =
       payment.escrowStatus === "released"
@@ -429,8 +476,17 @@ function EscrowActionsCard({
       "Approve required title documents (C of O and Survey Plan if present) before releasing funds.";
   } else if (!inspectionDone) {
     releaseHint = "Complete the property inspection before releasing funds.";
+  } else if (!hasAgentPayout) {
+    releaseHint =
+      "Cannot release yet: the listing owner must save payout bank details on their profile.";
   } else if (payment.fundsReleased) {
     releaseHint = "Funds have already been released for this escrow.";
+  }
+
+  let rejectHint = "";
+  if (!closed && !pendingPayment && !hasBuyerRefund) {
+    rejectHint =
+      "Cannot reject for refund yet: the buyer must save refund bank details on their profile.";
   }
 
   return (
@@ -498,6 +554,9 @@ function EscrowActionsCard({
           </button>
 
           <p className="text-xs text-muted">{releaseHint}</p>
+          {rejectHint ? (
+            <p className="text-xs text-amber-700">{rejectHint}</p>
+          ) : null}
 
           {reviewCase.error ? (
             <p className="text-xs text-red-600">

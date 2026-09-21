@@ -17,7 +17,16 @@ const DOC_ORDER: PropertyDocumentType[] = [
   "certificate_of_occupancy",
   "survey_plan",
   "deed_of_assignment",
+  "governors_consent",
+  "power_of_attorney",
+  "other_supporting",
 ];
+
+const OPTIONAL_DOC_TYPES = new Set<PropertyDocumentType>([
+  "governors_consent",
+  "power_of_attorney",
+  "other_supporting",
+]);
 
 const KYC_TONE: Record<AgentStatus, "success" | "warning" | "danger" | "neutral"> = {
   approved: "success",
@@ -56,11 +65,15 @@ function TitleDocumentsPanel({ property }: { property: AdminProperty }) {
     <section className="rounded-[12px] border border-[#E5E7EB] bg-white p-5">
       <h3 className="text-sm font-semibold text-[#111827]">Title Documents</h3>
       <p className="mt-1 text-xs text-[#6B7280]">
-        Certificate of Occupancy is required. Survey Plan must also be verified
-        if it was uploaded. Deed of Assignment is optional.
+        At least 2 core title documents must be verified (C of O, Survey Plan,
+        or Deed of Assignment). Governor&apos;s Consent, Power of Attorney, and
+        other supporting documents are optional.
       </p>
       {documents.length === 0 ? (
-        <p className="mt-4 text-sm text-[#6B7280]">No documents uploaded.</p>
+        <p className="mt-4 text-sm text-[#6B7280]">
+          No documents uploaded. Listing owners must submit at least 2 title
+          documents.
+        </p>
       ) : (
         <ul className="mt-4 space-y-3">
           {documents.map((doc) => (
@@ -84,6 +97,9 @@ function TitleDocumentsPanel({ property }: { property: AdminProperty }) {
                       {doc.name}
                     </span>
                   )}
+                  {doc.type && OPTIONAL_DOC_TYPES.has(doc.type as PropertyDocumentType) ? (
+                    <span className="mt-0.5 block text-xs text-[#6B7280]">Optional</span>
+                  ) : null}
                   {doc.uploadedAt ? (
                     <span className="mt-0.5 block text-xs text-[#6B7280]">
                       Uploaded {formatDate(doc.uploadedAt)}

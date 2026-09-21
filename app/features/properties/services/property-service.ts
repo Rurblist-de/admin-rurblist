@@ -59,7 +59,10 @@ export async function getAdminProperty(id: string) {
 export type PropertyDocumentType =
   | "certificate_of_occupancy"
   | "survey_plan"
-  | "deed_of_assignment";
+  | "deed_of_assignment"
+  | "governors_consent"
+  | "power_of_attorney"
+  | "other_supporting";
 
 export type PropertyDocumentAction = "approve" | "reject";
 export type PropertyListingAction = "approve" | "reject" | "flag";
@@ -94,11 +97,19 @@ export async function completePropertyInspection(
   );
 }
 
+export type PropertyListingReviewFeedback = {
+  title: string;
+  description: string;
+  issues?: string[];
+};
+
 export async function reviewPropertyListing(
   id: string,
   action: PropertyListingAction,
+  feedback?: PropertyListingReviewFeedback,
 ) {
   return api.authPatch<PropertyDetailData>(
     `/admin/properties/${id}/review/${action}`,
+    feedback,
   );
 }
