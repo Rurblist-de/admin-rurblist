@@ -14,4 +14,5 @@ export type {
   PropertyDocumentAction,
   PropertyDocumentType,
   PropertyListingAction,
+  PropertyListingReviewFeedback,
 } from "./property-service";

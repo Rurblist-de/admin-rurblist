@@ -12,6 +12,7 @@ import {
   type PropertyDocumentAction,
   type PropertyDocumentType,
   type PropertyListingAction,
+  type PropertyListingReviewFeedback,
 } from "./property-service";
 
 export async function getAdminProperties(params: PropertiesListParams) {
@@ -67,8 +68,9 @@ export async function completePropertyInspection(
 export async function reviewPropertyListing(
   id: string,
   action: PropertyListingAction,
+  feedback?: PropertyListingReviewFeedback,
 ) {
-  const res = await reviewPropertyListingRequest(id, action);
+  const res = await reviewPropertyListingRequest(id, action, feedback);
   if (res.statusCode >= 400 || !res.data) {
     throw new Error(res.message || `Unable to ${action} listing.`);
   }

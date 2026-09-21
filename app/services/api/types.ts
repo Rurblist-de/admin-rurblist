@@ -122,7 +122,13 @@ export type PropertyChecklistItem = {
 
 export type PropertyDocument = {
   id: string;
-  type?: "certificate_of_occupancy" | "survey_plan" | "deed_of_assignment";
+  type?:
+    | "certificate_of_occupancy"
+    | "survey_plan"
+    | "deed_of_assignment"
+    | "governors_consent"
+    | "power_of_attorney"
+    | "other_supporting";
   name: string;
   url?: string;
   uploadedAt: string;
@@ -171,6 +177,14 @@ export type AdminProperty = {
   featured?: boolean;
   flagged?: boolean;
   listingReview?: PropertyListingReview;
+  reviewFeedback?: {
+    title?: string | null;
+    description?: string | null;
+    issues?: string[];
+    action?: "approve" | "reject" | "flag" | null;
+    createdAt?: string | null;
+    createdBy?: string | null;
+  } | null;
   isSold?: boolean;
   totalUnits?: number;
   availableUnits?: number;
@@ -242,6 +256,15 @@ export type EscrowInspection = {
   timeline: EscrowInspectionStep[];
 };
 
+export type EscrowBankDetails = {
+  bankName: string;
+  bankCode?: string | null;
+  accountName: string;
+  accountNumber?: string;
+  accountNumberMasked?: string;
+  updatedAt?: string | null;
+};
+
 export type AdminPayment = {
   id: string;
   reference: string;
@@ -259,6 +282,8 @@ export type AdminPayment = {
   provider?: string;
   initiatedAt?: string;
   fundedAt?: string;
+  buyerBankDetails?: EscrowBankDetails | null;
+  agentPayoutDetails?: EscrowBankDetails | null;
   timeline?: EscrowTimelineStep[];
   verificationStatus?: VerificationStatus;
   fundsReleased?: boolean;

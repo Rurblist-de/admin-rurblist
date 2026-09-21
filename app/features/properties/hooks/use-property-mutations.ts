@@ -8,6 +8,7 @@ import {
   type PropertyDocumentAction,
   type PropertyDocumentType,
   type PropertyListingAction,
+  type PropertyListingReviewFeedback,
 } from "../services";
 
 export function usePropertyMutations(propertyId: string) {
@@ -46,8 +47,13 @@ export function usePropertyMutations(propertyId: string) {
   });
 
   const reviewListing = useMutation({
-    mutationFn: (action: PropertyListingAction) =>
-      reviewPropertyListing(propertyId, action),
+    mutationFn: ({
+      action,
+      feedback,
+    }: {
+      action: PropertyListingAction;
+      feedback?: PropertyListingReviewFeedback;
+    }) => reviewPropertyListing(propertyId, action, feedback),
     onSuccess: invalidate,
   });
 
