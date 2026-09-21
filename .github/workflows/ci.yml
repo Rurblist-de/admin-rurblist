@@ -32,4 +32,4 @@ jobs:
       - name: Build
         run: bun run build
         env:
-          VITE_API_URL: ${{ vars.VITE_API_URL || 'http://localhost:5000' }}
+          VITEAPIURL: ${{ vars.VITEAPIURL || 'http://localhost:5000' }}

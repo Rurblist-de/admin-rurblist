@@ -2,7 +2,7 @@ import axios from "axios";
 import { clearAuthCookie } from "~/lib/auth/session";
 
 export const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:6003",
+  baseURL: import.meta.env.VITEAPIURL ?? "http://localhost:6003",
   withCredentials: true,
   timeout: 30_000,
 });
